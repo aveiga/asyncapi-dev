@@ -1,0 +1,60 @@
+asyncapi: '2.0.0'
+id: 'urn:com.my-application.example'
+info:
+  title: Example
+  version: 0.1.0
+channels:
+  gdp-event-bus:
+    subscribe:
+      message:
+        description: An event describing that a user just signed up.
+        payload:
+          type: object
+          additionalProperties: false
+          properties:
+            fullName:
+              type: string
+            email:
+              type: string
+              format: email
+            age:
+              type: integer
+              minimum: 18
+    publish:
+      message:
+        description: An event describing that a user just signed up.
+        payload:
+          type: object
+          additionalProperties: false
+          properties:
+            fullName:
+              type: string
+            email:
+              type: string
+              format: email
+            age:
+              type: integer
+              minimum: 18
+    bindings:
+      $ref: "#/components/channelBindings/amqpTestTopic"
+      
+          
+components:
+  channelBindings:
+    amqpTestTopic:
+      amqp:
+        is: routingKey
+        exchange:
+          name: myExchange
+          type: topic
+          durable: true
+          autoDelete: false
+          vhost: /
+        queues:
+          tps_timetable_queue:
+            name: tps_timetable_queue
+            durable: true
+            exclusive: false
+            autoDelete: false
+
+      
