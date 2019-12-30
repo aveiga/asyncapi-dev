@@ -4,7 +4,7 @@ info:
   title: Example
   version: 0.1.0
 channels:
-  gdp-event-bus:
+  message-queue-name-one:
     subscribe:
       message:
         description: An event describing that a user just signed up.
@@ -37,6 +37,52 @@ channels:
               minimum: 18
     bindings:
       $ref: "#/components/channelBindings/amqpTestTopic"
+  message-queue-name-two:
+    subscribe:
+      message:
+        description: An event describing that a user just signed up.
+        payload:
+          type: object
+          additionalProperties: false
+          properties:
+            fullName:
+              type: string
+            email:
+              type: string
+              format: email
+            age:
+              type: integer
+              minimum: 18
+    publish:
+      message:
+        description: An event describing that a user just signed up.
+        payload:
+          type: object
+          additionalProperties: false
+          properties:
+            fullName:
+              type: string
+            email:
+              type: string
+              format: email
+            age:
+              type: integer
+              minimum: 18
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: myExchange
+          type: topic
+          durable: true
+          autoDelete: false
+          vhost: /
+        queues:
+          message-queue-name-two:
+            name: message-queue-name-two
+            durable: true
+            exclusive: false
+            autoDelete: false
       
           
 components:
@@ -51,8 +97,8 @@ components:
           autoDelete: false
           vhost: /
         queues:
-          tps_timetable_queue:
-            name: tps_timetable_queue
+          message-queue-name-one:
+            name: message-queue-name-one
             durable: true
             exclusive: false
             autoDelete: false
