@@ -1,4 +1,31 @@
 module.exports = ({ _, Nunjucks, Markdown, OpenAPISampler }) => {
+  Nunjucks.addFilter('amqpOperation', (operation) => {
+    return operation && operation._json && operation._json.bindings && operation._json.bindings.amqp;
+  });
+
+  Nunjucks.addFilter('amqpOperationName', (operation) => {
+    if (operation._json.bindings.amqp.exchange) {
+      return operation._json.bindings.amqp.exchange.name;
+    }
+    if (operation._json.bindings.amqp.queue) {
+      return operation._json.bindings.amqp.queue.name;
+    }
+    return '';
+  });
+
+  Nunjucks.addFilter('amqpQueue', (operation) => {
+    return operation && operation._json && operation._json.bindings && operation._json.bindings.amqp && operation._json.bindings.amqp.queue;
+  });
+
+  Nunjucks.addFilter('amqpExchange', (operation) => {
+    return operation && operation._json && operation._json.bindings && operation._json.bindings.amqp && operation._json.bindings.amqp.exchange;
+  });
+
+  Nunjucks.addFilter('amqpRoutingKey', (operation) => {
+    return operation && operation._json && operation._json.bindings && operation._json.bindings.amqp && operation._json.bindings.amqp.routingKey;
+  });
+
+
   Nunjucks.addFilter('split', (string, separator) => {
     if (typeof string !== 'string') return string;
     const regex = new RegExp(separator, 'g');
@@ -151,31 +178,6 @@ module.exports = ({ _, Nunjucks, Markdown, OpenAPISampler }) => {
     if (!schema || !schema.extensions || typeof schema.extensions !== 'function') return new Map();
     const extensions = Object.entries(schema.extensions());
     return new Map(extensions.filter(e => !e[0].startsWith('x-parser-')).filter(Boolean));
-  });
-
-  function objSerialize(obj) {
-    return Object.keys(obj).map(k => `${k}: ${obj[k]}`).join("; ");
-  };
-
-  function queueSerialize(queues) {
-    return Object.keys(queues).map(k => `${k}: [${objSerialize(queues[k])}]`).join("; ");
-  }
-
-  Nunjucks.addFilter('showTopicDetails', (channel) => {
-    if(channel && channel._json && channel._json.bindings && channel._json.bindings.amqp && channel._json.bindings.amqp.is && channel._json.bindings.amqp.exchange && channel._json.bindings.amqp.is === "routingKey") {
-      return `${objSerialize(channel._json.bindings.amqp.exchange)}`;
-    } else {
-      return "";
-    }
-    
-  });
-
-  Nunjucks.addFilter('showQueueDetails', (channel) => {
-    if(channel && channel._json && channel._json.bindings && channel._json.bindings.amqp && channel._json.bindings.amqp.queues) {
-      return `${queueSerialize(channel._json.bindings.amqp.queues)}`;
-    } else {
-      return "";
-    }    
   });
 
   Nunjucks.addFilter('jsonStringify', (obj) => {
