@@ -10,24 +10,116 @@
 <a name="operation-{{operationType}}-{{channelName}}"></a>
 <div class="center-block p-8">
   <div class="operation pt-8 pb-8">
-    <h3 class="font-mono text-base">
-      {% if operationType === 'publish' %}
-      <span class="font-mono border border-blue text-blue uppercase p-1 rounded" title="Publish">Pub</span>
-      {% endif %}
-      {% if operationType === 'subscribe' %}
-      <span class="font-mono border border-green-dark text-green-dark uppercase p-1 rounded"
-        title="Subscribe">Sub</span>
-      {% endif %}
-      {{ slicedString(channelName) }}
-    </h3>
-    <h3 class="font-mono text-base">
-        <span class="font-mono border border-blue text-blue uppercase p-1 rounded" title="Publish">Topic</span>
-        <span>{{ channel | showTopicDetails }} </span>
-    </h3>
-    <h3 class="font-mono text-base">
-        <span class="font-mono border border-blue text-blue uppercase p-1 rounded" title="Publish">Queue Details</span>
-        <span>{{ channel | showQueueDetails }}</span>
-    </h3>
+    {% if (operation | amqpOperation) %}
+      <div class="is-open">
+        <div class="js-prop cursor-pointer py-2 flex property">
+          <div>
+            <h3 class="font-mono text-base">
+              {% if operationType === 'publish' %}
+              <span class="font-mono border border-blue text-blue uppercase p-1 rounded" title="Publish">Pub</span>
+              {% endif %}
+              {% if operationType === 'subscribe' %}
+              <span class="font-mono border border-green-dark text-green-dark uppercase p-1 rounded"
+                title="Subscribe">Sub</span>
+              {% endif %}
+              {% if (operation | amqpQueue) %}
+                <span class="font-mono border border-orange text-orange uppercase p-1 rounded" title="AMQP Queue">AMQP Queue</span>
+                {{ slicedString((operation | amqpQueue).name) }}
+              {% endif %}
+              {% if (operation | amqpExchange) %}
+                <span class="font-mono border border-orange text-orange uppercase p-1 rounded" title="AMQP Exchange">AMQP Exchange</span>
+                {{ slicedString((operation | amqpExchange).name) }}
+              {% endif %}
+              <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
+                   xmlns="http://www.w3.org/2000/svg" y="0">
+                <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
+              </svg>
+            </h3>
+          </div>
+        </div>
+        <div class="children bg-grey-lighter p-4 rounded">
+          {% if (operation | amqpQueue) %}
+            {% if (operation | amqpQueue).bindings %}
+              <div class="is-open">
+                <div class="js-prop cursor-pointer py-2 flex property">
+                  <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+                    <span class="text-sm " style="word-break: break-word;">Bindings</span>
+                    <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
+                         xmlns="http://www.w3.org/2000/svg" y="0">
+                      <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="capitalize text-sm text-teal font-bold">
+                      Array&lt;Object&gt;
+                    </div>
+                  </div>
+                </div>
+                <div class="children bg-grey-lightest py-4 rounded">
+                  {% for binding in (operation | amqpQueue).bindings %}
+                    <div class="bg-grey-lightest px-8 py-1 rounded">
+                      <div>
+                        <div class="flex property">
+                          <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+                            <span class="text-sm " style="word-break: break-word;">Exchange:</span>
+                            <span class="text-sm font-bold">
+                              {{ binding.exchange }}
+                            </span>
+                          </div>
+                          <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+                            <span class="text-sm " style="word-break: break-word;">Binding Key:</span>
+                            <span class="text-sm font-bold">
+                              {{ binding.bindingKey }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+          {% if (operation | amqpExchange) %}
+            {% if (operation | amqpExchange).type %}
+              <div class="flex property">
+                <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+                  <span class="text-sm " style="word-break: break-word;">Type</span>
+                </div>
+                <div>
+                  <div class="text-sm font-bold">
+                    {{ (operation | amqpExchange).type }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if (operation | amqpRoutingKey) %}
+              <div class="flex property">
+                <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+                  <span class="text-sm " style="word-break: break-word;">Routing Key</span>
+                </div>
+                <div>
+                  <div class="text-sm font-bold">
+                    {{ (operation | amqpRoutingKey) }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <h3 class="font-mono text-base">
+        {% if operationType === 'publish' %}
+          <span class="font-mono border border-blue text-blue uppercase p-1 rounded" title="Publish">Pub</span>
+        {% endif %}
+        {% if operationType === 'subscribe' %}
+          <span class="font-mono border border-green-dark text-green-dark uppercase p-1 rounded"
+                title="Subscribe">Sub</span>
+        {% endif %}
+        {{ slicedString(channelName) }}
+      </h3>
+    {% endif %}
 
     <div class="mt-4 mb-4 markdown">{{ channel.description() | markdown2html | safe }}</div>
 
